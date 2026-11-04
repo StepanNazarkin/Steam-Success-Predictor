@@ -11,6 +11,21 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "category-encoders"
+version = "2.11.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/21/0a/1e233fb366ccc4aea77ee6311605cf960a85466f85434118477c3c747234/category_encoders-2.11.2.tar.gz", hash = "sha256:04a6334d83be3b5c94c1d599114819b19bace5823d6eb260f415fa37d7761318", size = 76688, upload-time = "2026-10-24T14:01:50.13Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/63/4ef7e690078cbb3ceab035477394c877ddf73dfcd9ee2c4606842348440a/category_encoders-2.11.2-py3-none-any.whl", hash = "sha256:7c5665d6e0f609f2140f3f1ac6d5e5d0b830f3e0b02646c66b8fea38683d4080", size = 108006, upload-time = "2026-10-24T14:01:48.758Z" },
+]
+
+[[package]]
 name = "cloudpickle"
 version = "3.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -872,6 +887,7 @@ name = "steam-success-predictor"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "category-encoders" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas" },
@@ -889,6 +905,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "category-encoders", specifier = ">=2.11.2" },
     { name = "matplotlib", specifier = ">=3.11.2" },
     { name = "numpy", specifier = ">=2.5.4" },
     { name = "pandas", specifier = ">=3.1.0" },
