@@ -6,13 +6,16 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "category-encoders>=2.11.2",
+    "joblib>=1.6.0",
     "matplotlib>=3.11.2",
     "numpy>=2.5.4",
+    "optuna>=5.0.0",
     "pandas>=3.1.0",
     "pyarrow>=26.0.1",
     "scikit-learn>=1.9.1",
     "seaborn>=0.13.2",
     "wordcloud>=1.9.6",
+    "xgboost>=3.4.1",
 ]
 
 [project.scripts]
