@@ -50,6 +50,7 @@ BEST_XGB_PARAMS = {
     "n_jobs": N_JOBS,
 }
 
+
 def prepare_raw_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["primary_developer"] = df["developers"].apply(
@@ -63,7 +64,10 @@ def prepare_raw_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _encode_single_multilabel(
-    train_series: pd.Series, test_series: pd.Series, prefix: str, top_k: int | None = None
+    train_series: pd.Series,
+    test_series: pd.Series,
+    prefix: str,
+    top_k: int | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, MultiLabelBinarizer]:
     train, test = train_series.copy(), test_series.copy()
 
@@ -71,17 +75,29 @@ def _encode_single_multilabel(
         counts = train.explode().value_counts()
         top_classes = set(counts.head(top_k).index)
         train = train.apply(
-            lambda items: [x for x in items if x in top_classes] if isinstance(items, list) else []
+            lambda items: (
+                [x for x in items if x in top_classes]
+                if isinstance(items, list)
+                else []
+            )
         )
         test = test.apply(
-            lambda items: [x for x in items if x in top_classes] if isinstance(items, list) else []
+            lambda items: (
+                [x for x in items if x in top_classes]
+                if isinstance(items, list)
+                else []
+            )
         )
 
     mlb = MultiLabelBinarizer()
     train_raw = mlb.fit_transform(train)
     cols = [f"{prefix}_{c}" for c in mlb.classes_]
 
-    return pd.DataFrame(train_raw, columns=cols), pd.DataFrame(mlb.transform(test), columns=cols), mlb
+    return (
+        pd.DataFrame(train_raw, columns=cols),
+        pd.DataFrame(mlb.transform(test), columns=cols),
+        mlb,
+    )
 
 
 def apply_multilabel_encoding(
@@ -98,7 +114,9 @@ def apply_multilabel_encoding(
     train_dfs, test_dfs, encoders = [], [], {}
 
     for col, prefix, top_k in configs:
-        tr_enc, te_enc, mlb = _encode_single_multilabel(df_train[col], df_test[col], prefix, top_k)
+        tr_enc, te_enc, mlb = _encode_single_multilabel(
+            df_train[col], df_test[col], prefix, top_k
+        )
         train_dfs.append(tr_enc)
         test_dfs.append(te_enc)
         encoders[f"mlb_{col}"] = mlb
@@ -116,7 +134,9 @@ def apply_target_encoding(
     feature_names = te_safe.get_feature_names_out(te_cols)
 
     dev_pub_train = pd.DataFrame(dev_pub_tr_raw, columns=feature_names)
-    dev_pub_test = pd.DataFrame(te_safe.transform(df_test[te_cols]), columns=feature_names)
+    dev_pub_test = pd.DataFrame(
+        te_safe.transform(df_test[te_cols]), columns=feature_names
+    )
 
     return dev_pub_train, dev_pub_test, te_safe
 
@@ -128,13 +148,19 @@ def apply_nlp_tfidf(
     tfidf.fit(df_train["short_description"])
     tfidf_cols = [f"tfidf_{w}" for w in tfidf.get_feature_names_out()]
 
-    tfidf_train = pd.DataFrame(tfidf.transform(df_train["short_description"]).toarray(), columns=tfidf_cols)
-    tfidf_test = pd.DataFrame(tfidf.transform(df_test["short_description"]).toarray(), columns=tfidf_cols)
+    tfidf_train = pd.DataFrame(
+        tfidf.transform(df_train["short_description"]).toarray(), columns=tfidf_cols
+    )
+    tfidf_test = pd.DataFrame(
+        tfidf.transform(df_test["short_description"]).toarray(), columns=tfidf_cols
+    )
 
     return tfidf_train, tfidf_test, tfidf
 
 
-def evaluate_and_log(model: XGBClassifier, X_test: pd.DataFrame, y_test: pd.Series) -> None:
+def evaluate_and_log(
+    model: XGBClassifier, X_test: pd.DataFrame, y_test: pd.Series
+) -> None:
     y_pred = model.predict(X_test)
     y_prob = model.predict_proba(X_test)
 
@@ -169,7 +195,9 @@ def train() -> None:
     te_tr, te_te, te_encoder = apply_target_encoding(df_full_train, y_train, df_test)
     tfidf_tr, tfidf_te, tfidf_vectorizer = apply_nlp_tfidf(df_full_train, df_test)
 
-    X_train_final = pd.concat([df_full_train[BASE_FEATURES], mlb_tr, te_tr, tfidf_tr], axis=1)
+    X_train_final = pd.concat(
+        [df_full_train[BASE_FEATURES], mlb_tr, te_tr, tfidf_tr], axis=1
+    )
     X_test_final = pd.concat([df_test[BASE_FEATURES], mlb_te, te_te, tfidf_te], axis=1)
     print(f"Final training matrix shape: {X_train_final.shape}")
 
