@@ -8,5 +8,10 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
+# Dataset
+data/raw/
+data/processed/
+data/
+
 # Ruff cache
 .ruff_cache/
