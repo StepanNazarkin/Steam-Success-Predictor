@@ -21,9 +21,7 @@ MLB_CONFIGS = [
 ]
 
 
-def _transform_multilabel(
-    df: pd.DataFrame, artifacts: dict[str, Any]
-) -> pd.DataFrame:
+def _transform_multilabel(df: pd.DataFrame, artifacts: dict[str, Any]) -> pd.DataFrame:
     encoded_dfs = []
 
     for col, prefix, encoder_key in MLB_CONFIGS:
@@ -31,9 +29,11 @@ def _transform_multilabel(
         known_classes = set(mlb.classes_)
 
         cleaned_series = df[col].apply(
-            lambda items: [x for x in items if x in known_classes]
-            if isinstance(items, list)
-            else []
+            lambda items: (
+                [x for x in items if x in known_classes]
+                if isinstance(items, list)
+                else []
+            )
         )
 
         transformed = mlb.transform(cleaned_series)
@@ -55,9 +55,7 @@ def _transform_target_encoding(
     return pd.DataFrame(transformed, columns=feature_names)
 
 
-def _transform_tfidf(
-    df: pd.DataFrame, artifacts: dict[str, Any]
-) -> pd.DataFrame:
+def _transform_tfidf(df: pd.DataFrame, artifacts: dict[str, Any]) -> pd.DataFrame:
     tfidf = artifacts["tfidf"]
     tfidf_cols = [f"tfidf_{w}" for w in tfidf.get_feature_names_out()]
 
@@ -90,8 +88,7 @@ def predict_game_success(
     predicted_class = int(np.argmax(probs))
 
     probabilities = {
-        TIER_MAPPING[idx]: round(float(prob), 4)
-        for idx, prob in enumerate(probs)
+        TIER_MAPPING[idx]: round(float(prob), 4) for idx, prob in enumerate(probs)
     }
     predicted_tier = TIER_MAPPING[predicted_class]
     confidence = probabilities[predicted_tier]
