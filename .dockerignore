@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+.ruff_cache
+__pycache__
+*.py[cod]
+data/
+notebooks/
+src/
+README.md
+predict.py
+train.py
