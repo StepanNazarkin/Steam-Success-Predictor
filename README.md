@@ -95,7 +95,7 @@ This project uses the **Steam Games Dataset** hosted on Kaggle:
 
 **Most Frequent Terms in Game Descriptions**
 
-![Description Word Cloud](docs/world_cloud.png)
+![Description Word Cloud](docs/word_cloud.png)
 
 **Top Feature Importances (Tuned XGBoost)**
 
