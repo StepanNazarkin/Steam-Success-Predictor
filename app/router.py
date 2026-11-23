@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/v1", tags=["Prediction"])
     status_code=status.HTTP_200_OK,
     summary="Predict Steam game pre-release success tier",
 )
-async def predict(
+def predict(
     payload: GamePredictionRequest,
     request: Request,
 ) -> GamePredictionResponse:
