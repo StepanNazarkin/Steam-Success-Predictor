@@ -2,7 +2,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class GamePredictionRequest(BaseModel):
-    # Numerical features
     price: float = Field(
         ..., ge=0.0, description="Game price in USD (0.0 for Free-to-Play)"
     )
@@ -14,11 +13,7 @@ class GamePredictionRequest(BaseModel):
     )
     screenshots_count: int = Field(default=0, ge=0, description="Number of screenshots")
     release_month: int = Field(..., ge=1, le=12, description="Release month (1-12)")
-    market_competition: int = Field(
-        default=0, ge=0, description="Market competition during the release period"
-    )
 
-    # Platform support and metadata flags
     windows: bool = Field(default=True, description="Windows support")
     mac: bool = Field(default=False, description="macOS support")
     linux: bool = Field(default=False, description="Linux support")
@@ -35,25 +30,21 @@ class GamePredictionRequest(BaseModel):
         default=False, description="Presence of a support email"
     )
 
-    # Categorical features for Target Encoding
-    primary_developer: str = Field(
-        ..., min_length=1, description="Primary developer name"
+    developers: list[str] = Field(
+        default_factory=list, description="List of developer names"
     )
-    primary_publisher: str = Field(
-        ..., min_length=1, description="Primary publisher name"
+    publishers: list[str] = Field(
+        default_factory=list, description="List of publisher names"
     )
 
-    # Text feature for TF-IDF
     short_description: str = Field(
         default="", description="Short game description on Steam"
     )
 
-    # Multi-label features for MultiLabelBinarizer
     genres: list[str] = Field(default_factory=list, description="List of game genres")
     categories: list[str] = Field(
         default_factory=list, description="List of Steam categories"
     )
-    tags: list[str] = Field(default_factory=list, description="List of tags")
     supported_languages: list[str] = Field(
         default_factory=list, description="Supported interface/subtitle languages"
     )
@@ -69,7 +60,6 @@ class GamePredictionRequest(BaseModel):
                 "achievements": 35,
                 "screenshots_count": 8,
                 "release_month": 10,
-                "market_competition": 1240,
                 "windows": True,
                 "mac": False,
                 "linux": False,
@@ -77,21 +67,15 @@ class GamePredictionRequest(BaseModel):
                 "has_website": True,
                 "has_support_url": True,
                 "has_support_email": True,
-                "primary_developer": "Supergiant Games",
-                "primary_publisher": "Supergiant Games",
+                "developers": ["Supergiant Games"],
+                "publishers": ["Supergiant Games"],
                 "short_description": "Defy the god of the dead as you hack and slash out of the Underworld in this rogue-like dungeon crawler.",
                 "genres": ["Action", "Indie", "RPG"],
                 "categories": [
                     "Single-player",
                     "Steam Achievements",
                     "Full controller support",
-                ],
-                "tags": [
-                    "Roguelike",
-                    "Action Roguelike",
-                    "Hack and Slash",
-                    "Mythology",
-                    "Great Soundtrack",
+                    "Steam Cloud",
                 ],
                 "supported_languages": [
                     "English",
@@ -99,6 +83,7 @@ class GamePredictionRequest(BaseModel):
                     "French",
                     "German",
                     "Spanish - Spain",
+                    "Simplified Chinese",
                 ],
                 "full_audio_languages": ["English"],
             }
@@ -108,9 +93,12 @@ class GamePredictionRequest(BaseModel):
 
 class GamePredictionResponse(BaseModel):
     success_tier: str = Field(
-        ..., description="Predicted success tier (Low, Medium, High)"
+        ..., description="Most likely success tier (Low, Medium, High)"
+    )
+    prob_20k_plus: float = Field(
+        ..., description="Combined probability of reaching 20k+ owners (Medium + High)"
     )
     probabilities: dict[str, float] = Field(
-        ..., description="Predicted probabilities for each success tier"
+        ..., description="Calibrated probabilities for each success tier"
     )
     summary: str = Field(description="Human-readable summary of the prediction")

@@ -15,10 +15,38 @@ TIER_MAPPING = {
 MLB_CONFIGS = [
     ("genres", "genre", "mlb_genres"),
     ("categories", "cat", "mlb_categories"),
-    ("tags", "tag", "mlb_tags"),
     ("full_audio_languages", "audio_lang", "mlb_full_audio_languages"),
     ("supported_languages", "lang", "mlb_supported_languages"),
 ]
+
+
+def _lookup_entity_history(
+    names: list[str],
+    lookup: dict[str, dict[str, int | float]],
+    prefix: str,
+) -> dict[str, int | float]:
+    matched = [
+        lookup[key]
+        for name in names
+        if (key := str(name).strip().lower()) and key in lookup
+    ]
+
+    if not matched:
+        return {
+            f"{prefix}_prev_games": 0,
+            f"{prefix}_prev_20k_count": 0,
+            f"{prefix}_prev_high_count": 0,
+            f"{prefix}_prev_20k_rate": np.nan,
+            f"{prefix}_prev_high_rate": np.nan,
+        }
+
+    return {
+        f"{prefix}_prev_games": max(int(m["prev_games"]) for m in matched),
+        f"{prefix}_prev_20k_count": max(int(m["prev_20k_count"]) for m in matched),
+        f"{prefix}_prev_high_count": max(int(m["prev_high_count"]) for m in matched),
+        f"{prefix}_prev_20k_rate": max(float(m["prev_20k_rate"]) for m in matched),
+        f"{prefix}_prev_high_rate": max(float(m["prev_high_rate"]) for m in matched),
+    }
 
 
 def _transform_multilabel(df: pd.DataFrame, artifacts: dict[str, Any]) -> pd.DataFrame:
@@ -69,8 +97,16 @@ def predict_game_success(
     artifacts: dict[str, Any],
 ) -> GamePredictionResponse:
     raw_data = request.model_dump()
-    raw_data["primary_developer"] = raw_data["primary_developer"].strip() or "Unknown"
-    raw_data["primary_publisher"] = raw_data["primary_publisher"].strip() or "Unknown"
+
+    devs = [d.strip() for d in raw_data["developers"] if d.strip()]
+    pubs = [p.strip() for p in raw_data["publishers"] if p.strip()]
+
+    raw_data["primary_developer"] = devs[0] if devs else "Unknown"
+    raw_data["primary_publisher"] = pubs[0] if pubs else "Unknown"
+    raw_data["short_description"] = raw_data.get("short_description") or ""
+
+    raw_data.update(_lookup_entity_history(devs, artifacts["dev_history"], "dev"))
+    raw_data.update(_lookup_entity_history(pubs, artifacts["pub_history"], "pub"))
 
     df = pd.DataFrame([raw_data])
     bool_cols = df.select_dtypes(include="bool").columns
@@ -90,11 +126,15 @@ def predict_game_success(
     probabilities = {
         TIER_MAPPING[idx]: round(float(prob), 4) for idx, prob in enumerate(probs)
     }
+    prob_20k_plus = round(float(probs[1] + probs[2]), 4)
     predicted_tier = TIER_MAPPING[predicted_class]
-    confidence = probabilities[predicted_tier]
 
     return GamePredictionResponse(
         success_tier=predicted_tier,
+        prob_20k_plus=prob_20k_plus,
         probabilities=probabilities,
-        summary=f"Predicted {predicted_tier} success tier with {confidence:.1%} confidence.",
+        summary=(
+            f"Most likely tier: {predicted_tier} ({probabilities[predicted_tier]:.1%}). "
+            f"Estimated chance of reaching 20k+ owners: {prob_20k_plus:.1%}."
+        ),
     )

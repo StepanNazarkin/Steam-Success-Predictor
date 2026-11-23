@@ -10,7 +10,6 @@ sample_game = {
     "achievements": 49,
     "screenshots_count": 21,
     "release_month": 9,
-    "market_competition": 520,
     "windows": True,
     "mac": True,
     "linux": False,
@@ -18,8 +17,8 @@ sample_game = {
     "has_website": True,
     "has_support_url": True,
     "has_support_email": True,
-    "primary_developer": "Supergiant Games",
-    "primary_publisher": "Supergiant Games",
+    "developers": ["Supergiant Games"],
+    "publishers": ["Supergiant Games"],
     "short_description": (
         "Defy the god of the dead as you hack and slash out of the Underworld "
         "in this rogue-like dungeon crawler from the creators of Bastion, Transistor, and Pyre."
@@ -29,31 +28,8 @@ sample_game = {
         "Single-player",
         "Steam Achievements",
         "Full controller support",
-        "Steam Trading Cards",
         "Steam Cloud",
         "Remote Play on TV",
-    ],
-    "tags": [
-        "Action Roguelike",
-        "Roguelike",
-        "Hack and Slash",
-        "Mythology",
-        "Indie",
-        "Action",
-        "Great Soundtrack",
-        "Dungeon Crawler",
-        "Roguelite",
-        "Singleplayer",
-        "Isometric",
-        "Difficult",
-        "Replay Value",
-        "Story Rich",
-        "Fast-Paced",
-        "RPG",
-        "2D",
-        "Hand-drawn",
-        "Atmospheric",
-        "Controller",
     ],
     "supported_languages": [
         "English",
@@ -75,7 +51,7 @@ sample_game = {
 def main() -> None:
     response = httpx.post(API_URL, json=sample_game, timeout=10.0)
     print(f"Status Code: {response.status_code}")
-    print("Response JSON:", json.dumps(response.json(), indent=2))
+    print("Response JSON:", json.dumps(response.json(), indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Steam Game Success Prediction API",
     description="Pre-release Steam game success tier classification service",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
