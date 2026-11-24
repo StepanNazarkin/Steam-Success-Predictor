@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class GamePredictionRequest(BaseModel):
     price: float = Field(
-        ..., ge=0.0, description="Game price in USD (0.0 for Free-to-Play)"
+        ..., ge=0.0, le=200.0, description="Game price in USD (0.0 for Free-to-Play)"
     )
     required_age: int = Field(
         default=0, ge=0, le=21, description="Minimum required age"

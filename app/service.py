@@ -20,6 +20,14 @@ MLB_CONFIGS = [
 ]
 
 
+def get_metadata(artifacts: dict[str, Any]) -> dict[str, list[str]]:
+    metadata = {
+        col: sorted(artifacts[encoder_key].classes_.tolist())
+        for col, _, encoder_key in MLB_CONFIGS
+    }
+    return metadata
+
+
 def _dedup_clean_strings(items: list[str]) -> list[str]:
     seen: set[str] = set()
     cleaned: list[str] = []

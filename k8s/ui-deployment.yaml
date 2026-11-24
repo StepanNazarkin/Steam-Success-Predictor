@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steam-predictor-ui-deployment
+  labels:
+    app: steam-predictor-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: steam-predictor-ui
+  template:
+    metadata:
+      labels:
+        app: steam-predictor-ui
+    spec:
+      containers:
+        - name: steam-predictor-ui
+          image: steam-success-predictor-ui:v1
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8501
+          readinessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          env:
+            - name: API_URL
+              value: "http://steam-predictor-service:8000/steam-predictor/"

@@ -2,7 +2,7 @@ import json
 
 import httpx
 
-API_URL = "http://127.0.0.1:8000/api/v1/predict"
+API_URL = "http://127.0.0.1:8000/steam-predictor/predict"
 
 sample_game = {
     "price": 24.99,
