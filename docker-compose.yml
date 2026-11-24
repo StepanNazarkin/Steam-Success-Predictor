@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    image: steam-success-predictor:v1
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    image: steam-success-predictor-ui:v1
+    ports: ["8501:8501"]
+    environment:
+      - API_URL=http://api:8000/steam-predictor/
+    depends_on:
+      api:
+        condition: service_healthy
