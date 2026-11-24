@@ -9,19 +9,22 @@ def get_artifacts(request: Request) -> dict[str, Any]:
     if artifacts is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Preprocessing artifacts are not loaded."
+            detail="Preprocessing artifacts are not loaded.",
         )
     return artifacts
 
+
 ArtifactsDep = Annotated[dict[str, Any], Depends(get_artifacts)]
+
 
 def get_model(request: Request) -> xgb.XGBClassifier:
     model = getattr(request.app.state, "model", None)
     if model is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Model is not loaded."
+            detail="Model is not loaded.",
         )
     return model
+
 
 ModelDep = Annotated[xgb.XGBClassifier, Depends(get_model)]

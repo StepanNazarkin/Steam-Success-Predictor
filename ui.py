@@ -17,17 +17,25 @@ st.markdown(
 )
 st.title("Steam Game Success Predictor")
 
+
 @st.cache_data
 def get_metadata() -> dict[str, list[str]]:
     response = httpx.get(f"{BASE_URL}metadata", timeout=5.0)
     response.raise_for_status()
     return response.json()
 
+
 with st.form("game_form"):
-    price = st.number_input("Price ($)", min_value=0.0, max_value=200.0, value=24.99, step=1.0)
+    price = st.number_input(
+        "Price ($)", min_value=0.0, max_value=200.0, value=24.99, step=1.0
+    )
     required_age = st.slider("Required age", 0, 21, 0)
-    achievements = st.number_input("Number of achievements", min_value=0, value=49, step=1)
-    screenshots_count = st.number_input("Number of screenshots", min_value=0, value=21, step=1)
+    achievements = st.number_input(
+        "Number of achievements", min_value=0, value=49, step=1
+    )
+    screenshots_count = st.number_input(
+        "Number of screenshots", min_value=0, value=21, step=1
+    )
     release_month = st.slider("Release month", 1, 12, 9)
 
     c1, c2, c3 = st.columns(3)
@@ -44,29 +52,35 @@ with st.form("game_form"):
     has_support_email = st.toggle("Presence of a support email", True)
 
     developers = st.multiselect(
-        "List of developers", 
-        options=["Supergiant Games"], 
-        default=["Supergiant Games"], 
-        accept_new_options=True, 
-        max_selections=5)
+        "List of developers",
+        options=["Supergiant Games"],
+        default=["Supergiant Games"],
+        accept_new_options=True,
+        max_selections=5,
+    )
     publishers = st.multiselect(
-        "List of publishers", 
-        options=["Supergiant Games"], 
-        default=["Supergiant Games"], 
-        accept_new_options=True, 
-        max_selections=5)
+        "List of publishers",
+        options=["Supergiant Games"],
+        default=["Supergiant Games"],
+        accept_new_options=True,
+        max_selections=5,
+    )
 
-    short_description = st.text_area("Short description", value="Defy the god of the dead as you hack and slash out of the Underworld "
-    "in this rogue-like dungeon crawler from the creators of Bastion, Transistor, and Pyre.")
+    short_description = st.text_area(
+        "Short description",
+        value="Defy the god of the dead as you hack and slash out of the Underworld "
+        "in this rogue-like dungeon crawler from the creators of Bastion, Transistor, and Pyre.",
+    )
 
     try:
         metadata = get_metadata()
         genres = st.multiselect(
-            "List of game genres", 
+            "List of game genres",
             options=metadata["genres"],
-            default=["Action", "Indie", "RPG"],)
+            default=["Action", "Indie", "RPG"],
+        )
         categories = st.multiselect(
-            "List of Steam categories", 
+            "List of Steam categories",
             options=metadata["categories"],
             default=[
                 "Single-player",
@@ -74,9 +88,10 @@ with st.form("game_form"):
                 "Full controller support",
                 "Steam Cloud",
                 "Remote Play on TV",
-            ])
+            ],
+        )
         supported_languages = st.multiselect(
-            "Supported interface/subtitle languages", 
+            "Supported interface/subtitle languages",
             options=metadata["supported_languages"],
             default=[
                 "English",
@@ -90,15 +105,19 @@ with st.form("game_form"):
                 "Russian",
                 "Simplified Chinese",
                 "Japanese",
-            ],)
+            ],
+        )
         full_audio_languages = st.multiselect(
-            "Languages with full audio support", 
+            "Languages with full audio support",
             options=metadata["full_audio_languages"],
-            default=["English"])
+            default=["English"],
+        )
     except httpx.HTTPError:
         st.error("Run FastApi first")
         st.stop()
-    submitted = st.form_submit_button("Predict", type="primary", use_container_width=True)
+    submitted = st.form_submit_button(
+        "Predict", type="primary", use_container_width=True
+    )
 
 if submitted:
     payload = {
@@ -124,13 +143,13 @@ if submitted:
     }
 
     with st.spinner("Predicting..."):
-        try: 
-            response = httpx.post(BASE_URL+"predict", json=payload, timeout=10.0)
+        try:
+            response = httpx.post(BASE_URL + "predict", json=payload, timeout=10.0)
             response.raise_for_status()
             data = response.json()
             m1, m2 = st.columns(2)
             m1.metric("Predicted Tier", data["success_tier"])
-            m2.metric("Chance 20k+ owners", f"{data["prob_20k_plus"]:.1%}")
+            m2.metric("Chance 20k+ owners", f"{data['prob_20k_plus']:.1%}")
 
             tier = data["success_tier"]
             if tier == "High":
